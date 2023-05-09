@@ -5,12 +5,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
-public class WelcomeController {
+@RequestMapping
+public class LoansController {
 
-    @GetMapping("/welcome")
-    public String sayWelcome(){
-        return "Welcome to spring security app";    
+    @GetMapping("/myLoans")
+    public String getLoansDetails(){
+        return "Loan details returned from DB";
     }
-    
 }
