@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping
 public class NoticesController {
     
-    @GetMapping("/myNotices")
+    @GetMapping("/notices")
     public String getNotices(){
         return "Notices returned from DB";
     }
