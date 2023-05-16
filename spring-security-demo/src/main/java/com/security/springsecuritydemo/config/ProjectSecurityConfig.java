@@ -6,11 +6,17 @@ import java.util.Collections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import com.security.springsecuritydemo.filter.CsrfCookieFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -19,7 +25,12 @@ public class ProjectSecurityConfig {
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName("_csrf");
+
+        http.securityContext().requireExplicitSave(false)
+            .and().sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))        // These 2 lines supply our external angular application with JsessionId so that we dont have to provide credentials every time earlier we were using spring inbuilt login so didnt needed this 
+            .cors().configurationSource(
                 new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -33,11 +44,15 @@ public class ProjectSecurityConfig {
                     }
                 }
             ).and()
-            // .csrf().disable()
+            .csrf(
+                (csrf)-> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact", "/register", "/addAccountDetails")
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
             .authorizeHttpRequests()
-            .requestMatchers("/myAccount/**", "myBalance", "myCards", "myLoans")
-            .authenticated()
-            .requestMatchers("/notices", "/contact", "/register")
+            .requestMatchers("/myCards").hasAuthority("admin")
+            .requestMatchers("/myAccount/**", "myBalance", "myLoans").hasAnyAuthority("user", "admin")
+            .requestMatchers("/user").authenticated()
+            .requestMatchers("/notices", "/contact", "/register", "/addAccountDetails")
             .permitAll()
             .and().formLogin()
             .and().httpBasic();
