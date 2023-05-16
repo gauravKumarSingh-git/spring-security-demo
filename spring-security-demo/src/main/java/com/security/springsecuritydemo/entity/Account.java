@@ -10,18 +10,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Builder
-public class Customer {
+public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private String name;
-    private String email;
-    private String mobileNumber;
-    private String password;
-    private String role;
+    private long accountNumber;
+    private int customerId;
+    private String accountType;
+    private String branchAddress;
     private String createDt;
 }

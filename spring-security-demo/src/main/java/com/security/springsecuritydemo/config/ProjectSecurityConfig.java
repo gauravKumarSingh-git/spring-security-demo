@@ -33,7 +33,7 @@ public class ProjectSecurityConfig {
     // for inbuilt users table schema and authorities table
     // @Bean
     // public UserDetailsService userDetailsService(DataSource dataSource){
-    //     return new JdbcUserDetailsManager(dataSource);
+        // return new JdbcUserDetailsManager(dataSource);
     // }
 
     // to create in memory users

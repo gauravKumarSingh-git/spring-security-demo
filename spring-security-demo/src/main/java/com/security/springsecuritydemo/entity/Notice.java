@@ -1,5 +1,7 @@
 package com.security.springsecuritydemo.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,14 +16,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Customer {
+public class Notice {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private String name;
-    private String email;
-    private String mobileNumber;
-    private String password;
-    private String role;
-    private String createDt;
+    private int noticeId;
+    private String noticeSummary;
+    private String noticeDetails;
+    private LocalDate noticeBegDt;
+    private LocalDate noticeEndDt;
+    private LocalDate createDt;
+    private LocalDate updateDt;
+    
 }
