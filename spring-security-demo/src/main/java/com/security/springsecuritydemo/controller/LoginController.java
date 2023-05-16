@@ -1,5 +1,7 @@
 package com.security.springsecuritydemo.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,7 @@ public class LoginController {
         try{
             String hashPwd = passwordEncoder.encode(customer.getPassword());
             customer.setPassword(hashPwd);
+            customer.setCreateDt(LocalDate.now().toString());
             savedCustomer = customerRepository.save(customer);
             if(savedCustomer.getId() > 0){
                 response = ResponseEntity
