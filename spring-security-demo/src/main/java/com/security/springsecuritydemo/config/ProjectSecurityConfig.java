@@ -1,6 +1,7 @@
 package com.security.springsecuritydemo.config;
 
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.security.springsecuritydemo.filter.CsrfCookieFilter;
+import com.security.springsecuritydemo.filter.JwtTokenGeneratorFilter;
+import com.security.springsecuritydemo.filter.JwtTokenValidatorFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -28,8 +31,10 @@ public class ProjectSecurityConfig {
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
 
-        http.securityContext().requireExplicitSave(false)
-            .and().sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))        // These 2 lines supply our external angular application with JsessionId so that we dont have to provide credentials every time earlier we were using spring inbuilt login so didnt needed this 
+        // http.securityContext().requireExplicitSave(false)
+        //     .and().sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))        // These 2 lines supply our external angular application with JsessionId so that we dont have to provide credentials every time earlier we were using spring inbuilt login so didnt needed this 
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)     // To tell UI that dont create JSESSIONID I will create my own JWT token
+            .and()
             .cors().configurationSource(
                 new CorsConfigurationSource() {
                     @Override
@@ -39,6 +44,7 @@ public class ProjectSecurityConfig {
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
+                        config.setExposedHeaders(Arrays.asList("Authorization"));       // because an authorization header will be sent from UI to backends
                         config.setMaxAge(3600L);
                         return config;
                     }
@@ -48,6 +54,8 @@ public class ProjectSecurityConfig {
                 (csrf)-> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact", "/register", "/addAccountDetails")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JwtTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JwtTokenValidatorFilter(), BasicAuthenticationFilter.class)
             .authorizeHttpRequests()
             // .requestMatchers("/myCards").hasAuthority("admin")
             // .requestMatchers("/myAccount/**", "myBalance", "myLoans").hasAnyAuthority("user", "admin")
